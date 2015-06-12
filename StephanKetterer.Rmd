@@ -1,0 +1,261 @@
+Wine data exploration  by Stephan Ketterer
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2)
+library(Hmisc)
+```
+
+```{r echo=FALSE, Load_the_Data}
+data = read.csv("C:/users/stephan/downloads/wineQualityWhites.csv")
+```{r}
+summary(data)
+```
+
+Starting with a summary of the data seems like a good idea. Already we can see that the quality variable stands out for several reasons.First of all, it is the only one that does not simply get measured by objective analysis, but gets assigned subjectively by humans. Secondly, in a way, all the other 11 variables are potentially contributing to the quality assigment to varrying degrees.
+# Univariate Plots Section
+Since the fact that it contains alcohol is one of the main characteristics of wine, let us see how that value is distributed.
+```{r echo=FALSE,warning=FALSE,Univariate_Plots}
+qplot(alcohol,data=data,binwidth=0.05)
+```
+
+
+Since wine is made by the process of turning sugar into alcohol and there is only a finite amount of sugar a grape can contain, the result is not all that suprising. What can be observed is roughly a normal distribution of alcohol levels.
+
+
+
+Overall we are interested in the taste( the quality variable) i wanna see how sugar is distributed in the different wines.
+```{r echo=FALSE,warning=FALSE}
+qplot(residual.sugar,binwidth=0.5,data=data)
+```
+
+Clearly not a bell shaped distribution and the x- axis should be formatted to allow a better overview.
+
+
+```{r echo=FALSE,warning=FALSE}
+ggplot(aes(x=residual.sugar),data=data)+geom_histogram(binwidth=0.15)+scale_x_continuous(limits=c(0,22))
+
+```
+
+
+A lot better use of the given space that increases the visibilty of the results.
+
+
+
+Finally let us have a look of quality is distributed, since after all that is the variable we are most interested in.
+
+```{r echo=FALSE,warning=FALSE }
+describe(data$quality)
+qplot(quality,data=data)
+
+```
+
+We can observe what looks pretty much like a bell curve, with a median of 6. Noticable is that we dont have any ten in our scores, or scores lower than 3.If look back at the summary at the start of the analysis, we can see that the Median is in infact 6 and the Mean with 5.878 is very close to it.
+
+
+
+Just for good measure, i wanna look at a variable that is not self explanatory and i actually had to look up.
+
+```{r echo=FALSE,warning=FALSE}
+ qplot(fixed.acidity, binwidth=0.1 ,data=data)
+```
+
+
+Eventhough we could again readjust the axis to get a better overview, it is pretty obvious that fixed.acidity gives us an almost perfect bell shaped curve with the median somewhere around 7.5 .
+
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+There are 4898 wines in the dataset with 12 features (fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates,alcohol and quality ). 
+
+### What is/are the main feature(s) of interest in your dataset?
+The main features in the data set is quality. I'd like to determine which features are best for predicting the quality of the wine. Since i am not much of a drinker, i have hardly any experience with wine. That means i have no preconceived notion which variables will be more important to the quality of the wine over others. However i have a hunch that the amount of residual sugar might play an important role, since sugar influences the taste so much.
+
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+I think all the acid variables will be of interest, since again, the level of acidity has a big impact on the taste.
+
+
+### Did you create any new variables from existing variables in the dataset?
+
+Since all variables are very independant from each other, i could not think of a new variable that was worth creating.
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+
+
+# Bivariate Plots Section
+```{r echo=FALSE,warning=FALSE, Bivariate_Plots}
+cor(data)
+```
+When analysing two variables a good first step is to get the correlations of all possible combinations of variables.That way we get a good overview of how variables relate to each other and what pairs might be interesting for further investigation.
+
+```{r echo=FALSE,warning=FALSE}
+ggplot(aes(x = quality, y = pH),data=data)+
+  geom_bar(stat="identity")
+```
+As a test, quality to pH. As the correlation factor would suggest, not much knowledge to gain here. 
+
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+I first  used cor(data) to get all the possible correlations pairwise. Looking at the quality column, unfortunately there is no single variable with a very strong correlation. The strongest one, is the postive correlation with level of alcohol (0.434).
+
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+The strongest relationships between two variables occured both in relation to densitiy. The correlation factor between density and residual sugar is 0.84, and between densitiy and alcohol -0.78. Both numbers indicate a very strong correlation. Those numbers are not at all suprising, since both sugar, and Alcohol( Chemically Ethanol)
+have different densities than water, which leads to the overall different densities of the different wines. 
+
+
+### What was the strongest relationship you found?
+
+density and residual sugar have a correlation coefficent of +0.84.
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE,warning=FALSE,  Multivariate_Plots}
+data$quality <- as.factor(data$quality)
+ggplot(aes(x = alcohol, y = chlorides),data=data)+
+  geom_point(aes(color = quality))+
+  scale_colour_brewer(palette="Set1")
+ ```
+
+
+We start with the quality with respect to level of alcohol and chloride level. We can clearly observe that the majoriy of datapoints are at the bottom at the graph. Still i am reluctant to just transform the axis to blow this part up. There are too many outliers with higher chloride levels in my judgement to simply cut them all off. Still we can clearly see the correlation of higher level of alcohol and higher quality grading.
+
+```{r echo=FALSE,warning=FALSE}
+ggplot(aes(x = alcohol, y = residual.sugar),data=data)+
+  geom_point(aes(color = quality))+
+  scale_colour_brewer(palette="Set1")
+
+```
+
+
+This plot shows a lot less outliers and at a later point in the analysis we will use it again later with transformed axis for a better overview of the data.
+
+View(data)
+
+
+What is clear by this point is, that with linear correlations over the entire range of the variables, we will not figure out what makes a wine get a good quality grading. Besides alcohol level the correlations are very weak. If i want to find meaningful conclusions from the dataset, i have to think about things that might evade the strict correlations calculation. I came up with the idea of "islands" of good quality wines. Where the conditions of the variables are just at the right levels to each other to get a good wine. These islands (if they exist at all) would not be detected by the classic correlation value. So went to stackoverflow made a post about my thinking, only to find out that what i naively called "islands" is actually knwon under the term "clustering".
+So i watched a video about k-means clustering and just thought i give it a try.
+
+
+data2<-data
+```{r echo=FALSE,warning=FALSE}
+data2<-data
+data2$quality<-NULL
+```
+I thought i will chose 3 is the number of different clusters so i can make the results easier to interpet.
+
+```{r echo=FALSE,warning=FALSE}
+results<-kmeans(data2,3)
+results
+table(data$quality,results$cluster)
+results$cluster2
+```
+
+Unfortunately even a quick glance shows us that the clustering( atleast in that way)did not work at all. Almost any grade is equally distributed over the calculated 3 clusters. Which means we cannot deduct any new knowledge from the clustering.
+
+
+
+
+Just to make sure we did not overlook something, let's plot those 3 buckets.
+
+
+```{r echo=FALSE,warning=FALSE}
+results$cluster2<- as.factor(results$cluster)
+ggplot(aes(x = alcohol, y = residual.sugar),data=data)+
+  geom_point(aes(color = results$cluster2))+
+  scale_colour_brewer(palette="Set1")+
+  scale_y_continuous(limits =c (0,28))
+
+```
+
+I transformed the axis to get rid of a few outliers. But just as we suspected from the numbers, the colors(buckets) are spread out all over the graph. There is no observerable concentration of any color in any part of the graph. Therefore our attempt to cluster the dataset to gain more insight into what makes a good wine failed.
+
+# Multivariate Analysis
+
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+Since the variable we are interested is quality, and the bivariate analysis showed the strongest correlation with alcohol content, i figured it is a good starting point to keep those two variables in the analysis and add one other.In order to use quality for those plots, i had to factor it .
+The only thing rather interesting was the almost utter lack of correlation between the value of interest(quality) and the other variables.
+
+### Were there any interesting or surprising interactions between features?
+
+When looking at quality and alcohol level specificially with the added variable of residual sugar,i fount it interesting, that there were several outliers with much higher residual sugar content.I discarded them in later plots to spread the remaining points better over the entire plot, but still it made me wonder, because all the outliers seemed to have decent quality grading. 
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE,warning=FALSE, Plot_One}
+ggplot(aes(x = residual.sugar, y = density),data=data)+
+  geom_point(alpha=0.2)+
+  scale_y_continuous(limits=c(0.99,1.01),name="density in kg/dm^3")+
+  ggtitle("Correlation between density and residual sugar")+
+  theme(plot.title = element_text(lineheight=.24, face="bold",size=16))+
+  scale_x_continuous(limits=c(0,30),name="residual sugar in %")+
+  geom_abline(intercept = 0.9908653878, slope = 0.0004947244, color='red',size=2)
+
+coef(lm(density ~ residual.sugar, data = data))
+
+
+```
+
+### Description One
+
+I used this plot to demonstrate the very strong positive correlation between residual sugar and density,Alpha was used to combat overplotting of points that were simpy to similar to get a clear visualisation without an appropiate alpha value.
+To illutrate it further i made R give me the coefficents for a linear graph that fits the point the best. Its almost a perfectly 45 degree line.
+
+
+
+
+### Plot Two
+```{r echo=FALSE, warning=FALSE,Plot_Two}
+ggplot(aes(x = quality),data=data)+
+  geom_histogram(color="green",fill="blue")+
+  scale_y_continuous(name="Number of times it occures in the dataset")+
+  ggtitle("Quality Disitribution of all wines")+
+  theme(plot.title = element_text(lineheight=.24, face="bold",size=24))
+```
+
+### Description Two
+
+The graph demonstrates the highly subjective quality assessment. There are no wines given the top score of 10, but also no wines that receive a score lower than 3. Given a dataset with almost 5000 wines that seems highly unlikely if it were not graded by humans.
+
+### Plot Three
+
+```{r echo=FALSE,warning=FALSE, Plot_Three}
+ggplot(aes(x = alcohol, y = residual.sugar),data=data)+
+  geom_point(aes(color = quality),position=position_jitter(width=0.1))+
+  scale_colour_brewer(type="seq", palette=4)+
+  scale_y_continuous(limits=c(0,28),name="residual sugar in %")+
+  scale_x_continuous(name="alchol in %")+
+  ggtitle("Quality in relation to sugar and alcohol")+theme(plot.title = element_text(lineheight=.24, face="bold",size=19))
+```
+
+### Description Three
+
+Jitter on the x-axis added was added to make the graph a bit more realistic. Very discrete values don't seem to model the real world very well in that instance, so with jitter we get a better understanding in my oppinion.
+We cleary see that on average , with more alcohol the quality grading is higher, but that the residual sugar has almost no effect. 
+
+# Reflection
+
+The wine dataset contained almost 5000 different kinds of white wines. I started out analyzing the data by looking over every pssible combination of correlation.Unfortunately the strongest ones, the direct correlation between density and residual sugar and density and level of alcohol were not containing the quality attributed to the wine, which was the variable of interest in that dataset.Those two strong correlations can be easily explained by simple physical properties(Ethanol is simply "lighter" than water and therefore lowers the overall density of the wine).Looking specifically at the quality grading of the wines, at first sight, the dataset seemed rather disappointing. Just one useful correlations, qquality and level of alcohol. The higher the level of alcohol the better the quality grading on average. That is disappointing, since it gives little guidance  concerning all other variables how to produce a wine that can be expected to be graded highly.On second glance though  this result was almost expectable in my oppinion. First of all , the quality grading is done by humans, and complety subjective. This is easily illustrated by the fact, that eventhough the rating system goes from one to ten, the highest grade was a 9, and there was no grade lower than a 3. Given a sample size of 5000, that is statistically just very unlikely in an objectively asssed variable.
+Finally, and the most important point in my oppinion is the following. If it was possible to predict with certainty the grading of a wine , and therefore extract the conditions of those ten variables under which a very high grading is achieved, there would be no more bad graded wines on the market within a very short period of time. Winemakers would simply analyze their product and adjust those characteristics to values that would assure a high grading. Therefore my final conclusion is, that the topic of "subjective taste" of wine might simple not be a good candidate for data analysis, atleast when only looking at the ten variables that were included in the dataset. 
